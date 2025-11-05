@@ -1,0 +1,65 @@
+# AI Character Toolkit Default Configuration
+
+# AI Provider Configuration
+ai:
+  provider: "openai"  # openai, claude
+  timeout: 30
+  max_retries: 3
+
+# OpenAI Configuration
+openai:
+  model: "gpt-4"
+  api_key: "${OPENAI_API_KEY}"  # Environment variable
+  base_url: null
+  organization: null
+  max_tokens: 2000
+  temperature: 0.7
+
+# Claude Configuration
+claude:
+  model: "claude-3-sonnet-20240229"
+  api_key: "${CLAUDE_API_KEY}"  # Environment variable
+  max_tokens: 2000
+  temperature: 0.7
+
+# Storage Configuration
+storage:
+  type: "file"  # file, database
+  file:
+    base_path: "./data"
+    format: "json"  # json, yaml
+  database:
+    url: "sqlite:///ai_toolkit.db"
+    table_prefix: "ai_toolkit_"
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: null  # Path to log file, null for console only
+  max_size: "10MB"
+  backup_count: 5
+
+# Dialogue Configuration
+dialogue:
+  max_history: 50
+  context_window: 10
+  auto_save: true
+
+# Character Configuration
+character:
+  template_path: "./templates"
+  cache_enabled: true
+  default_types: ["user", "expert", "organization"]
+
+# Concurrent Validation Configuration
+concurrent:
+  max_workers: 3
+  timeout: 60
+  retry_delay: 1
+
+# Analysis Configuration
+analysis:
+  sentiment_analysis: true
+  conflict_detection: true
+  opportunity_identification: true

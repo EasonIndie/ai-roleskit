@@ -1,0 +1,31 @@
+# AI Character Toolkit Requirements
+
+# Core dependencies
+asyncio-throttle>=1.0.2
+aiohttp>=3.8.0
+aiofiles>=22.1.0
+
+# AI providers
+openai>=1.0.0
+anthropic>=0.3.0
+
+# Template engine
+jinja2>=3.1.0
+
+# Configuration and data
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# CLI interface
+click>=8.1.0
+rich>=13.0.0
+
+# Optional: For enhanced NLP capabilities
+# tiktoken>=0.5.0  # OpenAI token counting
+# textstat>=0.7.0  # Text analysis
+
+# Development dependencies (optional)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
