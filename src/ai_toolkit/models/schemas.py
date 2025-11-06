@@ -272,6 +272,10 @@ class ExplorationSession:
             self.generated_characters.append(character_id)
             self.updated_at = datetime.now()
 
+    def update_timestamp(self):
+        """Update the session timestamp."""
+        self.updated_at = datetime.now()
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert exploration session to dictionary."""
         return {

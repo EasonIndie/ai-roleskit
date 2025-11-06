@@ -1,0 +1,41 @@
+{
+  "id": "7346fa99-ea06-490b-b636-d4710d6f7d71",
+  "name": "Dr. Alice Chen",
+  "type": "expert",
+  "description": "An expert in artificial intelligence and machine learning",
+  "info": {
+    "name": "Dr. Alice Chen",
+    "age": null,
+    "position": "AI Research Scientist",
+    "background": null,
+    "experience": "10 years in machine learning research"
+  },
+  "context": {
+    "current_situation": null,
+    "goals": null,
+    "challenges": null,
+    "resource_constraints": null
+  },
+  "expertise": {
+    "professional_field": null,
+    "special_skills": null,
+    "experience_level": null,
+    "industry_insights": null
+  },
+  "behavior": {
+    "decision_style": null,
+    "risk_preference": null,
+    "communication_style": null,
+    "values": null
+  },
+  "response": {
+    "focus_areas": null,
+    "avoidance_areas": null,
+    "expression_style": null,
+    "expected_outcomes": null
+  },
+  "created_at": "2025-11-06T09:26:22.888068",
+  "updated_at": "2025-11-06T09:26:22.888068",
+  "tags": [],
+  "metadata": {}
+}

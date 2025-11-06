@@ -1,0 +1,28 @@
+{
+  "id": "58e87f42-8515-410d-9abc-ec8d332b2bd6",
+  "initial_idea": "开发一个AI辅助学习编程的移动应用",
+  "exploration_data": {
+    "start_time": "2025-11-06T11:53:01.182083",
+    "questions_asked": [],
+    "insights_discovered": [],
+    "stakeholders_identified": [
+      {
+        "type": "primary_users",
+        "description": "主要用户群体"
+      },
+      {
+        "type": "secondary_users",
+        "description": "次要用户群体"
+      },
+      {
+        "type": "partners",
+        "description": "合作伙伴"
+      }
+    ],
+    "knowledge_areas": [],
+    "implementation_context": {}
+  },
+  "generated_characters": [],
+  "created_at": "2025-11-06T11:53:01.182098",
+  "updated_at": "2025-11-06T11:53:43.973142"
+}

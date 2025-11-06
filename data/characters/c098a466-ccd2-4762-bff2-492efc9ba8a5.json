@@ -1,0 +1,41 @@
+{
+  "id": "c098a466-ccd2-4762-bff2-492efc9ba8a5",
+  "name": "张博士",
+  "type": "expert",
+  "description": "专门研究人工智能和机器学习的资深专家",
+  "info": {
+    "name": "张博士",
+    "age": null,
+    "position": "AI研究科学家",
+    "background": null,
+    "experience": "15年机器学习和深度学习研究经验"
+  },
+  "context": {
+    "current_situation": null,
+    "goals": null,
+    "challenges": null,
+    "resource_constraints": null
+  },
+  "expertise": {
+    "professional_field": null,
+    "special_skills": null,
+    "experience_level": null,
+    "industry_insights": null
+  },
+  "behavior": {
+    "decision_style": null,
+    "risk_preference": null,
+    "communication_style": null,
+    "values": null
+  },
+  "response": {
+    "focus_areas": null,
+    "avoidance_areas": null,
+    "expression_style": null,
+    "expected_outcomes": null
+  },
+  "created_at": "2025-11-06T09:37:58.077136",
+  "updated_at": "2025-11-06T09:37:58.077136",
+  "tags": [],
+  "metadata": {}
+}

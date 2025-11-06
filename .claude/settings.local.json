@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(tree:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(conda:*)",
+      "Bash(where:*)",
+      "Bash(nul:*)",
+      "Bash(py:*)",
+      "Bash(ai-toolkit-envScriptsactivate)",
+      "Bash(call:*)",
+      "Bash(powershell:*)",
+      "Bash(chcp:*)",
+      "Bash(.ai-toolkit-envScriptsactivate)",
+      "Bash(pip install:*)",
+      "Bash(=6.0)",
+      "Bash(set PYTHONIOENCODING=utf-8)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

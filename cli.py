@@ -18,6 +18,7 @@ from ai_toolkit.utils.config import config
 from ai_toolkit.utils.logger import get_logger
 from ai_toolkit.ai.openai_provider import OpenAIProvider
 from ai_toolkit.ai.claude_provider import ClaudeProvider
+from ai_toolkit.ai.zhipu_provider import ZhipuProvider
 from ai_toolkit.core.character import CharacterManager
 from ai_toolkit.core.exploration import CreativeExplorer
 from ai_toolkit.core.dialogue import DialogueManager
@@ -50,8 +51,10 @@ def setup_ai_provider(provider_name: Optional[str] = None):
         ai_provider = OpenAIProvider(config.get_openai_config())
     elif provider_name == "claude":
         ai_provider = ClaudeProvider(config.get_claude_config())
+    elif provider_name == "zhipu":
+        ai_provider = ZhipuProvider(config.get_zhipu_config())
     else:
-        raise ValueError(f"Unsupported AI provider: {provider_name}")
+        raise ValueError(f"Unsupported AI provider: {provider_name}. Supported providers: openai, claude, zhipu")
 
     return ai_provider
 
