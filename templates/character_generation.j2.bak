@@ -1,0 +1,50 @@
+你是一个专业的角色设计师，擅长根据想法和探索结果创建真实、立体的角色。
+
+## 创意探索结果
+{{ exploration_summary }}
+
+## 任务要求
+请基于上述探索结果，生成一个详细的{{ character_type }}角色定义。
+
+请返回一个包含以下信息的JSON格式角色定义：
+
+```json
+{
+  "name": "角色姓名",
+  "description": "角色的详细描述",
+  "info": {
+    "name": "角色姓名",
+    "age": "年龄范围",
+    "position": "职位/身份",
+    "background": "背景经历",
+    "experience": "相关经验"
+  },
+  "context": {
+    "current_situation": "当前情况",
+    "goals": "主要目标",
+    "challenges": "面临的挑战",
+    "resource_constraints": "资源限制"
+  },
+  "expertise": {
+    "professional_field": "专业领域",
+    "special_skills": "特殊技能",
+    "experience_level": "经验水平",
+    "industry_insights": "行业洞察"
+  },
+  "behavior": {
+    "decision_style": "决策风格",
+    "risk_preference": "风险偏好",
+    "communication_style": "沟通风格",
+    "values": "价值观"
+  },
+  "response": {
+    "focus_areas": "关注重点",
+    "avoidance_areas": "避免领域",
+    "expression_style": "表达方式",
+    "expected_outcomes": "期望结果"
+  },
+  "tags": ["标签1", "标签2"]
+}
+```
+
+请确保角色定义真实可信，具有深度和一致性。
