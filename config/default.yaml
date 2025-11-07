@@ -2,7 +2,7 @@
 
 # AI Provider Configuration
 ai:
-  provider: "openai"  # openai, claude, zhipu
+  provider: "zhipu"  # openai, claude, zhipu
   timeout: 30
   max_retries: 3
 
@@ -24,7 +24,7 @@ claude:
 
 # ZhipuAI Configuration
 zhipu:
-  model: "glm-4-flash"  # 可选: glm-4, glm-4-flash, glm-4-air, glm-4-long, glm-3-turbo
+  model: "glm-4.6"  # 可选: glm-4, glm-4.6, glm-4-flash, glm-4-air, glm-4-long, glm-3-turbo
   api_key: "${ZHIPU_API_KEY}"  # Environment variable
   base_url: "https://open.bigmodel.cn/api/paas/v4/"
   max_tokens: 2000
