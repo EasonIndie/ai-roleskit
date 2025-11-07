@@ -41,10 +41,23 @@ class ZhipuProvider(BaseAIProvider):
             import httpx
             from zai import ZhipuAiClient
 
-            # 创建自定义httpx客户端以避免代理问题
+            # 优化的httpx客户端配置
+            # 保持使用同步客户端，因为ZhipuAI SDK可能要求同步客户端
+            # 优化超时配置和连接池设置
             http_client = httpx.Client(
-                timeout=httpx.Timeout(timeout=self.timeout, connect=10.0),
-                follow_redirects=True
+                timeout=httpx.Timeout(
+                    timeout=self.timeout,  # 总超时
+                    connect=15.0,          # 连接超时增加到15秒
+                    read=45.0,             # 读取超时45秒
+                    write=30.0             # 写入超时30秒
+                ),
+                limits=httpx.Limits(
+                    max_keepalive_connections=20,  # 保持连接池
+                    max_connections=100,           # 最大连接数
+                    keepalive_expiry=30.0          # 保持连接过期时间
+                ),
+                follow_redirects=True,
+                verify=True  # 启用SSL验证
             )
 
             self.client = ZhipuAiClient(
@@ -82,27 +95,39 @@ class ZhipuProvider(BaseAIProvider):
     async def initialize(self) -> None:
         """初始化AI提供商"""
         try:
-            # 测试连接
-            await self._test_connection()
+            # 优化初始化流程 - 延迟连接测试，避免阻塞初始化
             self.logger.info("智谱AI提供商初始化完成")
+            self._connection_tested = False  # 标记连接测试未完成
         except Exception as e:
             self.logger.error(f"智谱AI提供商初始化失败: {e}")
             raise
 
     async def _test_connection(self):
-        """测试API连接"""
+        """测试API连接 - 延迟到首次使用时执行"""
         try:
+            if self._connection_tested:
+                return True  # 连接已测试过，跳过
+
+            import time
+            start_time = time.time()
+
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": "test"}],
                 max_tokens=1
             )
+
+            duration = time.time() - start_time
+
             if response.choices:
-                self.logger.info("智谱API连接测试成功")
+                self.logger.info(f"智谱API连接测试成功，耗时 {duration:.2f} 秒")
+                self._connection_tested = True
+                return True
             else:
                 raise Exception("智谱API连接测试失败：无响应")
         except Exception as e:
             self.logger.error(f"智谱API连接测试失败: {e}")
+            self._connection_tested = False
             raise
 
     def _load_models(self) -> List[AIModel]:
@@ -161,7 +186,7 @@ class ZhipuProvider(BaseAIProvider):
 
         # 构建请求参数
         zhipu_request = {
-            "model": request.metadata.get("model", self.model) if request.metadata else self.model,
+            "model": self.model,
             "messages": messages,
             "max_tokens": request.max_tokens or self.max_tokens,
             "temperature": request.temperature or self.temperature,
@@ -234,22 +259,52 @@ class ZhipuProvider(BaseAIProvider):
         Returns:
             AI响应
         """
+        import time
+        start_time = time.time()
+
         try:
             self.logger.debug(f"发送智谱API请求: {len(request.messages)} 条消息")
 
             # 转换请求格式
             zhipu_request = self._convert_request_format(request)
 
-            # 调用智谱API（同步调用在异步环境中运行）
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self.client.chat.completions.create(**zhipu_request)
-            )
+            # 添加请求时间戳用于诊断
+            zhipu_request["request_id"] = f"req_{int(start_time)}"
+
+            # 优化的API调用 - 使用更好的异常处理和超时控制
+            try:
+                # 使用run_in_executor但添加更好的异常处理
+                loop = asyncio.get_event_loop()
+
+                # 创建可包装的函数以便更好的错误处理
+                def api_call():
+                    return self.client.chat.completions.create(**zhipu_request)
+
+                # 执行API调用，保持使用run_in_executor
+                response = await loop.run_in_executor(None, api_call)
+
+            except asyncio.TimeoutError:
+                self.logger.error(f"智谱API调用超时: {time.time() - start_time:.2f}秒，尝试回退方案")
+                # 尝试回退方案 - 直接HTTP调用
+                return await self._fallback_direct_http(zhipu_request, start_time)
+            except Exception as api_error:
+                self.logger.error(f"智谱API调用异常: {api_error}，尝试回退方案")
+                # 尝试回退方案 - 直接HTTP调用
+                return await self._fallback_direct_http(zhipu_request, start_time)
 
             # 转换响应格式
             ai_response = self._convert_response_format(response)
 
-            self.logger.debug(f"智谱API响应: {len(ai_response.content)} 字符")
+            # 添加性能监控信息
+            duration = time.time() - start_time
+            self.logger.debug(f"智谱API响应: {len(ai_response.content)} 字符，耗时 {duration:.2f} 秒")
+
+            # 添加性能元数据
+            ai_response.metadata.update({
+                "duration": duration,
+                "request_id": zhipu_request.get("request_id"),
+                "provider_version": "optimized_v1"
+            })
 
             return ai_response
 
@@ -259,7 +314,10 @@ class ZhipuProvider(BaseAIProvider):
                 content=f"智谱API调用失败: {str(e)}",
                 role="assistant",
                 finish_reason="error",
-                metadata={"error": str(e)}
+                metadata={
+                    "error": str(e),
+                    "duration": time.time() - start_time
+                }
             )
 
     async def chat_completion_stream(self, request: AIRequest) -> AsyncGenerator[str, None]:
@@ -295,3 +353,97 @@ class ZhipuProvider(BaseAIProvider):
         except Exception as e:
             self.logger.error(f"智谱流式API调用失败: {e}")
             yield f"智谱流式API调用失败: {str(e)}"
+
+    async def _fallback_direct_http(self, zhipu_request: dict, start_time: float) -> AIResponse:
+        """
+        回退方案：直接HTTP调用智谱API（类似demo脚本的方式）
+
+        Args:
+            zhipu_request: 智谱API请求参数
+            start_time: 开始时间
+
+        Returns:
+            AI响应
+        """
+        try:
+            import httpx
+            import json
+            import time
+
+            self.logger.info("使用回退方案：直接HTTP调用")
+
+            # 构建HTTP请求
+            url = f"{self.base_url}chat/completions"
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+
+            # 过滤请求参数，只保留API支持的参数
+            api_params = {
+                "model": zhipu_request["model"],
+                "messages": zhipu_request["messages"],
+                "max_tokens": zhipu_request.get("max_tokens", self.max_tokens),
+                "temperature": zhipu_request.get("temperature", self.temperature),
+                "stream": False
+            }
+
+            # 添加可选参数
+            if "top_p" in zhipu_request:
+                api_params["top_p"] = zhipu_request["top_p"]
+            if "stop" in zhipu_request:
+                api_params["stop"] = zhipu_request["stop"]
+
+            # 使用异步HTTP客户端
+            async with httpx.AsyncClient(
+                timeout=httpx.Timeout(timeout=45.0, connect=15.0),
+                follow_redirects=True
+            ) as client:
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    json=api_params
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    if "choices" in data and data["choices"]:
+                        content = data["choices"][0]["message"]["content"]
+                        usage = data.get("usage", {})
+
+                        self.logger.info(f"回退方案成功，耗时 {time.time() - start_time:.2f} 秒")
+
+                        return AIResponse(
+                            content=content,
+                            role="assistant",
+                            finish_reason="stop",
+                            usage={
+                                "prompt_tokens": usage.get("prompt_tokens", 0),
+                                "completion_tokens": usage.get("completion_tokens", 0),
+                                "total_tokens": usage.get("total_tokens", 0)
+                            },
+                            metadata={
+                                "method": "fallback_http",
+                                "duration": time.time() - start_time,
+                                "request_id": zhipu_request.get("request_id"),
+                                "status_code": response.status_code
+                            }
+                        )
+                    else:
+                        raise Exception("回退API响应格式错误")
+                else:
+                    raise Exception(f"回退API错误: {response.status_code} - {response.text}")
+
+        except Exception as e:
+            self.logger.error(f"回退方案也失败: {e}")
+            return AIResponse(
+                content=f"智谱API调用失败（包括回退方案）: {str(e)}",
+                role="assistant",
+                finish_reason="error",
+                metadata={
+                    "error": str(e),
+                    "method": "fallback_failed",
+                    "duration": time.time() - start_time,
+                    "request_id": zhipu_request.get("request_id")
+                }
+            )

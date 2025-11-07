@@ -417,3 +417,326 @@ class FileStorage:
                 total_size += file_path.stat().st_size
 
         return round(total_size / (1024 * 1024), 2)  # Convert to MB
+
+    async def save_exploration_formatted(self, exploration, output_format: str = "markdown") -> str:
+        """
+        Save exploration session with formatted output for human reading.
+
+        Args:
+            exploration: Exploration session to save
+            output_format: Output format ("markdown", "html", "txt")
+
+        Returns:
+            Path to the formatted file
+        """
+        try:
+            # Create formatted output directory
+            formatted_dir = self.base_path / 'formatted'
+            formatted_dir.mkdir(exist_ok=True)
+
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            extension = {
+                'markdown': '.md',
+                'html': '.html',
+                'txt': '.txt'
+            }.get(output_format, '.md')
+
+            filename = f"exploration_{exploration.id[:8]}_{timestamp}{extension}"
+            file_path = formatted_dir / filename
+
+            # Generate formatted content
+            if output_format == "markdown":
+                content = self._format_exploration_markdown(exploration)
+            elif output_format == "html":
+                content = self._format_exploration_html(exploration)
+            else:  # txt
+                content = self._format_exploration_text(exploration)
+
+            # Save formatted file
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+            self.logger.info(f"Exploration formatted report saved: {file_path}")
+            return str(file_path)
+
+        except Exception as e:
+            self.logger.error(f"Failed to save formatted exploration {exploration.id}: {e}")
+            raise
+
+    def _format_exploration_markdown(self, exploration) -> str:
+        """Format exploration session as Markdown."""
+        content = []
+
+        # Header
+        content.append("# 创意探索报告")
+        content.append("=" * 50)
+        content.append("")
+
+        # Basic Information
+        content.append("## 基本信息")
+        content.append("")
+        content.append(f"- **探索ID**: {exploration.id}")
+        content.append(f"- **初始想法**: {exploration.initial_idea}")
+        content.append(f"- **创建时间**: {exploration.created_at}")
+        content.append(f"- **更新时间**: {exploration.updated_at}")
+        content.append("")
+
+        # Exploration Steps
+        if hasattr(exploration, 'exploration_steps') and exploration.exploration_steps:
+            content.append("## 探索步骤")
+            content.append("")
+
+            for i, step in enumerate(exploration.exploration_steps, 1):
+                content.append(f"### 步骤 {i}: {step.get('analysis_type', '未知类型')}")
+                content.append("")
+                content.append(f"**时间**: {step.get('timestamp', 'N/A')}")
+                content.append(f"**响应长度**: {step.get('response_length', 0)} 字符")
+                content.append("")
+
+                # Prompt
+                content.append("#### 探索提示")
+                content.append("")
+                content.append("```")
+                content.append(step.get('prompt', '无提示'))
+                content.append("```")
+                content.append("")
+
+                # AI Response
+                content.append("#### AI 分析结果")
+                content.append("")
+                ai_response = step.get('ai_response', '无响应')
+                content.append(ai_response)
+                content.append("")
+
+        # AI Analyses
+        if hasattr(exploration, 'ai_analyses') and exploration.ai_analyses:
+            content.append("## AI 分析汇总")
+            content.append("")
+
+            for i, analysis in enumerate(exploration.ai_analyses, 1):
+                content.append(f"### 分析 {i}")
+                content.append("")
+                content.append(analysis)
+                content.append("")
+
+        # Stakeholders
+        if hasattr(exploration, 'stakeholders') and exploration.stakeholders:
+            content.append("## 利益相关者")
+            content.append("")
+
+            for stakeholder in exploration.stakeholders:
+                content.append(f"### {stakeholder.get('description', '未知群体')}")
+                content.append("")
+                content.append(f"- **类型**: {stakeholder.get('type', '未知')}")
+                content.append(f"- **详情**: {stakeholder.get('details', '无详情')}")
+                content.append("")
+
+        # Statistics
+        if hasattr(exploration, 'statistics'):
+            stats = exploration.statistics
+            content.append("## 统计信息")
+            content.append("")
+            content.append(f"- **探索步骤数**: {stats.get('total_steps', 0)}")
+            content.append(f"- **分析总字符数**: {stats.get('total_analysis_chars', 0)}")
+            content.append(f"- **利益相关者数量**: {stats.get('stakeholder_count', 0)}")
+            content.append(f"- **探索时长**: {stats.get('duration', 'N/A')}")
+            content.append("")
+
+        # Footer
+        content.append("---")
+        content.append(f"*报告生成时间: {datetime.now()}*")
+        content.append("")
+        content.append("*本报告由 AI Character Toolkit 自动生成*")
+
+        return "\n".join(content)
+
+    def _format_exploration_html(self, exploration) -> str:
+        """Format exploration session as HTML."""
+        # Basic HTML structure with embedded CSS
+        html = f"""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创意探索报告 - {exploration.initial_idea}</title>
+    <style>
+        body {{ font-family: 'Microsoft YaHei', Arial, sans-serif; line-height: 1.6; margin: 40px; }}
+        .header {{ background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }}
+        .section {{ margin-bottom: 30px; }}
+        .step {{ background: #ffffff; border: 1px solid #e9ecef; padding: 20px; margin: 15px 0; border-radius: 8px; }}
+        .ai-response {{ background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }}
+        .stakeholder {{ background: #e3f2fd; padding: 15px; margin: 10px 0; border-radius: 5px; }}
+        .stats {{ background: #fff3e0; padding: 15px; border-radius: 5px; }}
+        pre {{ background: #f1f3f4; padding: 10px; border-radius: 5px; overflow-x: auto; }}
+        h1 {{ color: #2c3e50; }}
+        h2 {{ color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; }}
+        h3 {{ color: #7f8c8d; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>创意探索报告</h1>
+        <p><strong>探索ID:</strong> {exploration.id}</p>
+        <p><strong>初始想法:</strong> {exploration.initial_idea}</p>
+        <p><strong>创建时间:</strong> {exploration.created_at}</p>
+    </div>
+
+    <div class="section">
+        <h2>探索步骤</h2>
+        {self._format_steps_html(exploration)}
+    </div>
+
+    <div class="section">
+        <h2>利益相关者</h2>
+        {self._format_stakeholders_html(exploration)}
+    </div>
+
+    <div class="section">
+        <h2>统计信息</h2>
+        <div class="stats">
+            {self._format_stats_html(exploration)}
+        </div>
+    </div>
+
+    <footer>
+        <hr>
+        <p><em>报告生成时间: {datetime.now()}</em></p>
+        <p><em>本报告由 AI Character Toolkit 自动生成</em></p>
+    </footer>
+</body>
+</html>
+        """
+        return html
+
+    def _format_steps_html(self, exploration) -> str:
+        """Format exploration steps as HTML."""
+        if not hasattr(exploration, 'exploration_steps') or not exploration.exploration_steps:
+            return "<p>暂无探索步骤</p>"
+
+        steps_html = []
+        for i, step in enumerate(exploration.exploration_steps, 1):
+            step_html = f"""
+            <div class="step">
+                <h3>步骤 {i}: {step.get('analysis_type', '未知类型')}</h3>
+                <p><strong>时间:</strong> {step.get('timestamp', 'N/A')}</p>
+                <p><strong>响应长度:</strong> {step.get('response_length', 0)} 字符</p>
+
+                <h4>探索提示</h4>
+                <pre>{step.get('prompt', '无提示')}</pre>
+
+                <h4>AI 分析结果</h4>
+                <div class="ai-response">
+                    {step.get('ai_response', '无响应').replace(chr(10), '<br>')}
+                </div>
+            </div>
+            """
+            steps_html.append(step_html)
+
+        return "".join(steps_html)
+
+    def _format_stakeholders_html(self, exploration) -> str:
+        """Format stakeholders as HTML."""
+        if not hasattr(exploration, 'stakeholders') or not exploration.stakeholders:
+            return "<p>暂无利益相关者信息</p>"
+
+        stakeholders_html = []
+        for stakeholder in exploration.stakeholders:
+            stakeholder_html = f"""
+            <div class="stakeholder">
+                <h3>{stakeholder.get('description', '未知群体')}</h3>
+                <p><strong>类型:</strong> {stakeholder.get('type', '未知')}</p>
+                <p><strong>详情:</strong> {stakeholder.get('details', '无详情')}</p>
+            </div>
+            """
+            stakeholders_html.append(stakeholder_html)
+
+        return "".join(stakeholders_html)
+
+    def _format_stats_html(self, exploration) -> str:
+        """Format statistics as HTML."""
+        if not hasattr(exploration, 'statistics'):
+            return "<p>暂无统计信息</p>"
+
+        stats = exploration.statistics
+        return f"""
+        <ul>
+            <li><strong>探索步骤数:</strong> {stats.get('total_steps', 0)}</li>
+            <li><strong>分析总字符数:</strong> {stats.get('total_analysis_chars', 0)}</li>
+            <li><strong>利益相关者数量:</strong> {stats.get('stakeholder_count', 0)}</li>
+            <li><strong>探索时长:</strong> {stats.get('duration', 'N/A')}</li>
+        </ul>
+        """
+
+    def _format_exploration_text(self, exploration) -> str:
+        """Format exploration session as plain text."""
+        content = []
+
+        # Header
+        content.append("=" * 60)
+        content.append("创意探索报告")
+        content.append("=" * 60)
+        content.append("")
+
+        # Basic Information
+        content.append("基本信息:")
+        content.append("-" * 20)
+        content.append(f"探索ID: {exploration.id}")
+        content.append(f"初始想法: {exploration.initial_idea}")
+        content.append(f"创建时间: {exploration.created_at}")
+        content.append(f"更新时间: {exploration.updated_at}")
+        content.append("")
+
+        # Exploration Steps
+        if hasattr(exploration, 'exploration_steps') and exploration.exploration_steps:
+            content.append("探索步骤:")
+            content.append("-" * 20)
+
+            for i, step in enumerate(exploration.exploration_steps, 1):
+                content.append(f"\n步骤 {i}: {step.get('analysis_type', '未知类型')}")
+                content.append(f"时间: {step.get('timestamp', 'N/A')}")
+                content.append(f"响应长度: {step.get('response_length', 0)} 字符")
+                content.append("")
+
+                content.append("探索提示:")
+                content.append("-" * 10)
+                content.append(step.get('prompt', '无提示'))
+                content.append("")
+
+                content.append("AI 分析结果:")
+                content.append("-" * 10)
+                content.append(step.get('ai_response', '无响应'))
+                content.append("")
+                content.append("=" * 40)
+                content.append("")
+
+        # Stakeholders
+        if hasattr(exploration, 'stakeholders') and exploration.stakeholders:
+            content.append("利益相关者:")
+            content.append("-" * 20)
+
+            for stakeholder in exploration.stakeholders:
+                content.append(f"\n{stakeholder.get('description', '未知群体')}")
+                content.append(f"类型: {stakeholder.get('type', '未知')}")
+                content.append(f"详情: {stakeholder.get('details', '无详情')}")
+                content.append("")
+
+        # Statistics
+        if hasattr(exploration, 'statistics'):
+            stats = exploration.statistics
+            content.append("统计信息:")
+            content.append("-" * 20)
+            content.append(f"探索步骤数: {stats.get('total_steps', 0)}")
+            content.append(f"分析总字符数: {stats.get('total_analysis_chars', 0)}")
+            content.append(f"利益相关者数量: {stats.get('stakeholder_count', 0)}")
+            content.append(f"探索时长: {stats.get('duration', 'N/A')}")
+            content.append("")
+
+        # Footer
+        content.append("=" * 60)
+        content.append(f"报告生成时间: {datetime.now()}")
+        content.append("本报告由 AI Character Toolkit 自动生成")
+        content.append("=" * 60)
+
+        return "\n".join(content)

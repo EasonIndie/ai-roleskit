@@ -367,7 +367,7 @@ class DialogueManager:
         # Generate response
         request = AIRequest(
             messages=[
-                {"role": "system", "content:": character_prompt},
+                {"role": "system", "content": character_prompt},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=config.get('dialogue.max_tokens', 1500),

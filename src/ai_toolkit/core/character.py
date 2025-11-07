@@ -511,6 +511,24 @@ class CharacterManager:
         """
         return self.characters.get(character_id)
 
+    async def add_character(self, character: Character) -> bool:
+        """
+        Add an existing character to storage.
+
+        Args:
+            character: Character to add
+
+        Returns:
+            True if added successfully
+        """
+        if character.id not in self.characters:
+            self.characters[character.id] = character
+            self.logger.info(f"Character added: {character.name}")
+            return True
+        else:
+            self.logger.warning(f"Character already exists: {character.name}")
+            return False
+
     async def update_character(self, character: Character) -> bool:
         """
         Update character in storage.
