@@ -1,0 +1,89 @@
+{
+  "id": "ccb54b5e-7a9f-4a13-8c84-a37147955790",
+  "name": "User Character",
+  "type": "user",
+  "description": "\n好的，遵照您的指示，我将基于探索结果，为您生成一个详细的 **user** 角色定义。\n\n---\n\n### **角色定义：用户**\n\n**角色名称：** 李明\n\n---\n\n#### **1. 具体的背景信息**\n\n*   **身份：** 全栈独立开发者 / 微型初创公司创始人。\n*   **年龄：** 30岁。\n*   **教育背景：** 计算机科学专业本科毕业，有8年软件开发经验。\n*   *...",
+  "info": {
+    "name": "User Character",
+    "age": "30-40",
+    "position": "End User",
+    "background": "Experienced professional",
+    "experience": "5+ years"
+  },
+  "context": {
+    "current_situation": "Exploring new opportunities",
+    "goals": "To provide valuable insights",
+    "challenges": "Complex problem solving",
+    "resource_constraints": "Time and information limitations"
+  },
+  "expertise": {
+    "professional_field": "User Experience",
+    "special_skills": "Analysis and communication",
+    "experience_level": "Senior level",
+    "industry_insights": "Deep industry knowledge"
+  },
+  "behavior": {
+    "decision_style": "Analytical and collaborative",
+    "risk_preference": "Moderate risk tolerance",
+    "communication_style": "Clear and constructive",
+    "values": "Integrity and excellence"
+  },
+  "response": {
+    "focus_areas": "Practical solutions and insights",
+    "avoidance_areas": "Speculation without evidence",
+    "expression_style": "Professional and direct",
+    "expected_outcomes": "Actionable recommendations"
+  },
+  "tags": [
+    "user",
+    "generated"
+  ],
+  "metadata": {
+    "generation_method": "ai_assisted",
+    "exploration_summary": {
+      "initial_idea": "我想开发一个自动生成软件著作权的工具，解决中小公司或者个人开发者申请软著的麻烦",
+      "key_insights": [
+        "解决软著申请的复杂流程",
+        "服务中小公司和个人开发者",
+        "自动化文档生成",
+        "提高申请效率"
+      ],
+      "stakeholders": [
+        {
+          "type": "user",
+          "description": "需要申请软著的开发者"
+        },
+        {
+          "type": "expert",
+          "description": "知识产权专家"
+        },
+        {
+          "type": "organization",
+          "description": "技术服务提供商"
+        }
+      ],
+      "knowledge_areas": [
+        {
+          "area": "软件著作权",
+          "importance": "high"
+        },
+        {
+          "area": "文档生成",
+          "importance": "medium"
+        },
+        {
+          "area": "法律合规",
+          "importance": "high"
+        }
+      ],
+      "implementation_context": {
+        "organization_type": "科技公司",
+        "resource_level": "中等",
+        "complexity": "中等偏上"
+      }
+    },
+    "generation_time": "2025-11-07T17:10:31.526806"
+  },
+  "created_at": "2025-11-07T17:10:31.526838",
+  "updated_at": "2025-11-07T17:10:31.526839"
+}
